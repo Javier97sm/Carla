@@ -423,9 +423,9 @@ struct CarlaPlugin::ProtectedData {
     // -------------------------------------------------------------------
     // Library functions
 
-    static const char* libError(const char* filename) noexcept;
+    static const char* libError(const char* filename, const bool use_libbox64 = false) noexcept;
 
-    bool libOpen(const char* filename) noexcept;
+    bool libOpen(const char* filename, const bool use_libbox64 = false) noexcept;
     bool libClose() noexcept;
     void setCanDeleteLib(bool canDelete) noexcept;
 
@@ -433,7 +433,7 @@ struct CarlaPlugin::ProtectedData {
     bool uiLibClose() noexcept;
 
     template<typename Func>
-    Func libSymbol(const char* symbol) const noexcept
+    Func libSymbol(const char* symbol, const bool use_libbox64 = false) const noexcept
     {
         return lib_symbol<Func>(lib, symbol);
     }

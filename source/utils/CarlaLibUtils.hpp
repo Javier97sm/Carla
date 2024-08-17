@@ -35,7 +35,7 @@ typedef void* lib_t;
  * May return null, in which case "lib_error" has the error.
  */
 static inline
-lib_t lib_open(const char* const filename, const bool global = false) noexcept
+lib_t lib_open(const char* const filename, const bool global = false, const bool use_libbox64 = false) noexcept
 {
     CARLA_SAFE_ASSERT_RETURN(filename != nullptr && filename[0] != '\0', nullptr);
 
@@ -74,7 +74,7 @@ bool lib_close(const lib_t lib) noexcept
  */
 template<typename Func>
 static inline
-Func lib_symbol(const lib_t lib, const char* const symbol) noexcept
+Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox64 = false) noexcept
 {
     CARLA_SAFE_ASSERT_RETURN(lib != nullptr, nullptr);
     CARLA_SAFE_ASSERT_RETURN(symbol != nullptr && symbol[0] != '\0', nullptr);
@@ -100,7 +100,7 @@ Func lib_symbol(const lib_t lib, const char* const symbol) noexcept
  * May return null.
  */
 static inline
-const char* lib_error(const char* const filename) noexcept
+const char* lib_error(const char* const filename, const bool use_libbox64 = false) noexcept
 {
     CARLA_SAFE_ASSERT_RETURN(filename != nullptr && filename[0] != '\0', nullptr);
 

@@ -60,7 +60,7 @@ public:
         fLibs.clear();
     }
 
-    lib_t open(const char* const filename, const bool canDelete = true) noexcept
+    lib_t open(const char* const filename, const bool canDelete = true, const bool use_libbox64 = false) noexcept
     {
         CARLA_SAFE_ASSERT_RETURN(filename != nullptr && filename[0] != '\0', nullptr);
 
@@ -91,7 +91,7 @@ public:
             }
         }
 
-        const lib_t libPtr = lib_open(filename);
+        const lib_t libPtr = lib_open(filename, false, use_libbox64);
 
         if (libPtr == nullptr)
         {

@@ -955,14 +955,14 @@ void CarlaPlugin::ProtectedData::postponeMidiLearnRtEvent(const bool sendCallbac
 
 static LibCounter sLibCounter;
 
-const char* CarlaPlugin::ProtectedData::libError(const char* const fname) noexcept
+const char* CarlaPlugin::ProtectedData::libError(const char* const fname, const bool use_libbox64 ) noexcept
 {
-    return lib_error(fname);
+    return lib_error(fname, use_libbox64);
 }
 
-bool CarlaPlugin::ProtectedData::libOpen(const char* const fname) noexcept
+bool CarlaPlugin::ProtectedData::libOpen(const char* const fname, const bool use_libbox64 ) noexcept
 {
-    lib = sLibCounter.open(fname);
+    lib = sLibCounter.open(fname, true, use_libbox64);
     return (lib != nullptr);
 }
 

@@ -2463,6 +2463,7 @@ public:
         // ---------------------------------------------------------------
 
         VST_Function vstFn;
+	const bool use_libbox64 = true;
 
 #ifdef CARLA_OS_MAC
         CarlaString filenameCheck(filename);
@@ -2493,20 +2494,20 @@ public:
             // -----------------------------------------------------------
             // open DLL
 
-            if (! pData->libOpen(filename))
+            if (! pData->libOpen(filename, use_libbox64))
             {
-                pData->engine->setLastError(pData->libError(filename));
+                pData->engine->setLastError(pData->libError(filename, use_libbox64));
                 return false;
             }
 
             // -----------------------------------------------------------
             // get DLL main entry
 
-            vstFn = pData->libSymbol<VST_Function>("VSTPluginMain");
+            vstFn = pData->libSymbol<VST_Function>("VSTPluginMain", use_libbox64);
 
             if (vstFn == nullptr)
             {
-                vstFn = pData->libSymbol<VST_Function>("main");
+                vstFn = pData->libSymbol<VST_Function>("main", use_libbox64);
 
                 if (vstFn == nullptr)
                 {
