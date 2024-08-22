@@ -435,7 +435,7 @@ struct CarlaPlugin::ProtectedData {
     template<typename Func>
     Func libSymbol(const char* symbol, const bool use_libbox64 = false) const noexcept
     {
-        return lib_symbol<Func>(lib, symbol);
+        return lib_symbol<Func>(lib, symbol, use_libbox64);
     }
 
     template<typename Func>

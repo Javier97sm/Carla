@@ -30,6 +30,52 @@ typedef void* lib_t;
 // -----------------------------------------------------------------------
 // library related calls
 
+typedef lib_t (*RunFuncWithEmulatorFunction)(const void *, const char *);
+static RunFuncWithEmulatorFunction RunFuncWithEmulator = NULL;
+
+typedef lib_t (*LoadLibraryWithEmulatorFunction)(const char*);
+static LoadLibraryWithEmulatorFunction LoadLibraryWithEmulator = NULL;
+
+typedef int (*InitializeFunction)();
+
+static void InitBox64() {
+    char box64_lib_path[] = "/home/javier/Documents/Github/box64/build/libbox64.so";
+    char box64_ld_library_path[] = "/home/javier/Documents/Github/box64/x64lib";
+
+    setenv("BOX64_LD_LIBRARY_PATH", box64_ld_library_path, 1);
+
+    void* box64_lib_handle = dlopen(box64_lib_path, RTLD_GLOBAL | RTLD_NOW);
+    if (!box64_lib_handle) {
+        fprintf(stderr, "Error loading box64 library: %s\n", dlerror());
+        abort();
+    }
+
+    void* box64_init_func = dlsym(box64_lib_handle, "Initialize");
+    if (!box64_init_func) {
+        fprintf(stderr, "Error getting symbol \"Initialize\" from box64 library: %s\n", dlerror());
+        abort();
+    }
+    int (*Initialize)() = reinterpret_cast<InitializeFunction>(box64_init_func);
+    if (Initialize() != 0) {
+        fprintf(stderr, "Error initializing box64 library\n");
+        abort();
+    }
+
+    LoadLibraryWithEmulator = reinterpret_cast<LoadLibraryWithEmulatorFunction>(dlsym(box64_lib_handle, "LoadX64Library"));
+    if (!LoadLibraryWithEmulator) {
+        fprintf(stderr, "Error getting symbol \"LoadX64Library\" from box64 library: %s\n", dlerror());
+        abort();
+    }
+
+    RunFuncWithEmulator = reinterpret_cast<RunFuncWithEmulatorFunction>(dlsym(box64_lib_handle, "RunX64Function"));
+    if (!RunFuncWithEmulator) {
+        fprintf(stderr, "Error getting symbol \"RunX64Function\" from box64 library: %s\n", dlerror());
+        abort();
+    }
+
+    printf("box64 library initialized.\n");
+}
+
 /*
  * Open 'filename' library (must not be null).
  * May return null, in which case "lib_error" has the error.
@@ -45,7 +91,12 @@ lib_t lib_open(const char* const filename, const bool global = false, const bool
         // unused
         (void)global;
 #else
-        return ::dlopen(filename, RTLD_NOW|(global ? RTLD_GLOBAL : RTLD_LOCAL));
+	if (use_libbox64) {
+            InitBox64();
+	    return LoadLibraryWithEmulator(filename);
+	} else {			
+            return ::dlopen(filename, RTLD_NOW|(global ? RTLD_GLOBAL : RTLD_LOCAL));
+	}
 #endif
     } CARLA_SAFE_EXCEPTION_RETURN("lib_open", nullptr);
 }
@@ -90,7 +141,13 @@ Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox
 #  pragma GCC diagnostic pop
 # endif
 #else
-        return reinterpret_cast<Func>(::dlsym(lib, symbol));
+	if (use_libbox64) {
+	    //InitBox64();
+            //lib_t paco = LoadLibraryWithEmulator("/home/javier/.vst/yabridge/Toneforge-MishaMansoorAdvanced.so");
+            return reinterpret_cast<Func>(RunFuncWithEmulator(lib, symbol));
+	} else {
+	    return reinterpret_cast<Func>(::dlsym(lib, symbol));
+	}
 #endif
     } CARLA_SAFE_EXCEPTION_RETURN("lib_symbol", nullptr);
 }

@@ -3418,18 +3418,20 @@ public:
         V3_EXITFN v3_exit;
         V3_GETFN v3_get;
 
+        const bool use_libbox64 = true;
+
         // filename is full path to binary
         if (water::File(filename).existsAsFile())
         {
-            if (! pData->libOpen(filename))
+            if (! pData->libOpen(filename, use_libbox64))
             {
-                pData->engine->setLastError(pData->libError(filename));
+                pData->engine->setLastError(pData->libError(filename, use_libbox64));
                 return false;
             }
 
-            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME);
-            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME);
-            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME);
+            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME, use_libbox64);
+            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME, use_libbox64);
+            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME, use_libbox64);
         }
         // assume filename is a vst3 bundle
         else
@@ -3466,13 +3468,13 @@ public:
 
             if (! pData->libOpen(binaryfilename.toRawUTF8()))
             {
-                pData->engine->setLastError(pData->libError(binaryfilename.toRawUTF8()));
+                pData->engine->setLastError(pData->libError(binaryfilename.toRawUTF8(), use_libbox64));
                 return false;
             }
 
-            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME);
-            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME);
-            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME);
+            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME, use_libbox64);
+            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME, use_libbox64);
+            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME, use_libbox64);
            #endif
         }
 
