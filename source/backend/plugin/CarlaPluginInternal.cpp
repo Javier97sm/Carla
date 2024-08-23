@@ -960,9 +960,9 @@ const char* CarlaPlugin::ProtectedData::libError(const char* const fname, const 
     return lib_error(fname, use_libbox64);
 }
 
-bool CarlaPlugin::ProtectedData::libOpen(const char* const fname, const bool use_libbox64 ) noexcept
+bool CarlaPlugin::ProtectedData::libOpen(const char* const fname, const bool use_libbox64, LoadLibraryWithEmulatorFunction loadLibraryFunction) noexcept
 {
-    lib = sLibCounter.open(fname, true, use_libbox64);
+    lib = sLibCounter.open(fname, true, use_libbox64, loadLibraryFunction);
     return (lib != nullptr);
 }
 

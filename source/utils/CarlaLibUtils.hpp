@@ -81,7 +81,7 @@ static void InitBox64() {
  * May return null, in which case "lib_error" has the error.
  */
 static inline
-lib_t lib_open(const char* const filename, const bool global = false, const bool use_libbox64 = false) noexcept
+lib_t lib_open(const char* const filename, const bool global = false, const bool use_libbox64 = false, LoadLibraryWithEmulatorFunction loadLibraryFunction = nullptr) noexcept
 {
     CARLA_SAFE_ASSERT_RETURN(filename != nullptr && filename[0] != '\0', nullptr);
 
@@ -92,8 +92,7 @@ lib_t lib_open(const char* const filename, const bool global = false, const bool
         (void)global;
 #else
 	if (use_libbox64) {
-            InitBox64();
-	    return LoadLibraryWithEmulator(filename);
+	    return loadLibraryFunction(filename);
 	} else {			
             return ::dlopen(filename, RTLD_NOW|(global ? RTLD_GLOBAL : RTLD_LOCAL));
 	}
@@ -125,7 +124,7 @@ bool lib_close(const lib_t lib) noexcept
  */
 template<typename Func>
 static inline
-Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox64 = false) noexcept
+Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox64 = false, RunFuncWithEmulatorFunction runLibraryFunction = nullptr) noexcept
 {
     CARLA_SAFE_ASSERT_RETURN(lib != nullptr, nullptr);
     CARLA_SAFE_ASSERT_RETURN(symbol != nullptr && symbol[0] != '\0', nullptr);
@@ -142,9 +141,7 @@ Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox
 # endif
 #else
 	if (use_libbox64) {
-	    //InitBox64();
-            //lib_t paco = LoadLibraryWithEmulator("/home/javier/.vst/yabridge/Toneforge-MishaMansoorAdvanced.so");
-            return reinterpret_cast<Func>(RunFuncWithEmulator(lib, symbol));
+            return reinterpret_cast<Func>(runLibraryFunction(lib, symbol));
 	} else {
 	    return reinterpret_cast<Func>(::dlsym(lib, symbol));
 	}
