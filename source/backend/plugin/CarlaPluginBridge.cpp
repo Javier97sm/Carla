@@ -3221,7 +3221,7 @@ private:
 
         if (fInitError || ! fInitiated)
         {
-            fBridgeThread.stopThread(6000);
+            fBridgeThread.stopThread(15000);
 
             if (! fInitError)
                 pData->engine->setLastError("Timeout while waiting for a response from plugin-bridge\n"

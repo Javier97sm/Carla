@@ -3403,18 +3403,6 @@ public:
             abort();
         }
 
-	void* box64_init_func = dlsym(box64_lib_handle, "Initialize");
-        if (!box64_init_func) {
-            fprintf(stderr, "Error getting symbol \"Initialize\" from box64 library: %s\n", dlerror());
-            abort();
-        }
-
-        int (*Initialize)() = reinterpret_cast<InitializeFunction>(box64_init_func);
-        if (Initialize() != 0) {
-            fprintf(stderr, "Error initializing box64 library\n");
-            abort();
-        }
-
         LoadLibraryWithEmulator = reinterpret_cast<LoadLibraryWithEmulatorFunction>(dlsym(box64_lib_handle, "LoadX64Library"));
         if (!LoadLibraryWithEmulator) {
             fprintf(stderr, "Error getting symbol \"LoadX64Library\" from box64 library: %s\n", dlerror());
