@@ -3553,7 +3553,7 @@ public:
         // ------------------------------------------------------------------------------------------------------------
         // fetch initial factory
 
-        v3_plugin_factory** const factory = v3_get();
+        v3_plugin_factory** const factory = reinterpret_cast<v3_plugin_factory**>(RunFuncWithEmulator(reinterpret_cast<const void*>(v3_get), 0));
 
         if (factory == nullptr)
         {
