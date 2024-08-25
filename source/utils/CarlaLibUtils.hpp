@@ -30,13 +30,17 @@ typedef void* lib_t;
 // -----------------------------------------------------------------------
 // library related calls
 
-typedef lib_t (*RunFuncWithEmulatorFunction)(const void *, const char *);
-static RunFuncWithEmulatorFunction RunFuncWithEmulator = NULL;
+
+typedef int (*InitializeFunction)();
 
 typedef lib_t (*LoadLibraryWithEmulatorFunction)(const char*);
 static LoadLibraryWithEmulatorFunction LoadLibraryWithEmulator = NULL;
 
-typedef int (*InitializeFunction)();
+typedef intptr_t (*GetFunctionWithEmulatorFunction)(const void *, const char *);
+static GetFunctionWithEmulatorFunction GetFunctionWithEmulator = NULL;
+
+typedef uintptr_t (*RunFuncWithEmulatorFunction)(const void *, int, ...);
+static RunFuncWithEmulatorFunction RunFuncWithEmulator = NULL;
 
 
 /*
@@ -87,7 +91,7 @@ bool lib_close(const lib_t lib) noexcept
  */
 template<typename Func>
 static inline
-Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox64 = false, RunFuncWithEmulatorFunction runLibraryFunction = nullptr) noexcept
+Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox64 = false, GetFunctionWithEmulatorFunction getLibraryFunction = nullptr) noexcept
 {
     CARLA_SAFE_ASSERT_RETURN(lib != nullptr, nullptr);
     CARLA_SAFE_ASSERT_RETURN(symbol != nullptr && symbol[0] != '\0', nullptr);
@@ -104,7 +108,7 @@ Func lib_symbol(const lib_t lib, const char* const symbol, const bool use_libbox
 # endif
 #else
 	if (use_libbox64) {
-            return reinterpret_cast<Func>(runLibraryFunction(lib, symbol));
+            return reinterpret_cast<Func>(getLibraryFunction(lib, symbol));
 	} else {
 	    return reinterpret_cast<Func>(::dlsym(lib, symbol));
 	}

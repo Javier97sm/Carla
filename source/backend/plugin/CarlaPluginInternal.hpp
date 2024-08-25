@@ -426,6 +426,9 @@ struct CarlaPlugin::ProtectedData {
     typedef lib_t (*RunFuncWithEmulatorFunction)(const void *, const char *);
     static RunFuncWithEmulatorFunction RunFuncWithEmulator;
 
+    typedef intptr_t (*GetFunctionWithEmulatorFunction)(const void *, const char *);
+    static GetFunctionWithEmulatorFunction GetFunctionWithEmulator;
+
     typedef lib_t (*LoadLibraryWithEmulatorFunction)(const char*);
     static LoadLibraryWithEmulatorFunction LoadLibraryWithEmulator;
 
@@ -441,9 +444,9 @@ struct CarlaPlugin::ProtectedData {
     bool uiLibClose() noexcept;
 
     template<typename Func>
-    Func libSymbol(const char* symbol, const bool use_libbox64 = false, RunFuncWithEmulatorFunction runLibraryFunction = nullptr) const noexcept
+    Func libSymbol(const char* symbol, const bool use_libbox64 = false, GetFunctionWithEmulatorFunction getLibraryFunction = nullptr) const noexcept
     {
-        return lib_symbol<Func>(lib, symbol, use_libbox64, runLibraryFunction);
+        return lib_symbol<Func>(lib, symbol, use_libbox64, getLibraryFunction);
     }
 
     template<typename Func>

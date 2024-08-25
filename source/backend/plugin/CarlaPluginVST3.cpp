@@ -3403,9 +3403,26 @@ public:
             abort();
         }
 
+        void* box64_init_func = dlsym(box64_lib_handle, "Initialize");
+        if (!box64_init_func) {
+            fprintf(stderr, "Error getting symbol \"Initialize\" from box64 library: %s\n", dlerror());
+            abort();
+        }
+        int (*Initialize)() = reinterpret_cast<InitializeFunction>(box64_init_func);
+        if (Initialize() != 0) {
+            fprintf(stderr, "Error initializing box64 library\n");
+            abort();
+        }
+
         LoadLibraryWithEmulator = reinterpret_cast<LoadLibraryWithEmulatorFunction>(dlsym(box64_lib_handle, "LoadX64Library"));
         if (!LoadLibraryWithEmulator) {
             fprintf(stderr, "Error getting symbol \"LoadX64Library\" from box64 library: %s\n", dlerror());
+            abort();
+        }
+
+        GetFunctionWithEmulator = reinterpret_cast<GetFunctionWithEmulatorFunction>(dlsym(box64_lib_handle, "GetX64FunctionAddress"));
+        if (!GetFunctionWithEmulator) {
+            fprintf(stderr, "Error getting symbol \"GetX64FunctionAddress\" from box64 library: %s\n", dlerror());
             abort();
         }
 
@@ -3446,9 +3463,9 @@ public:
         V3_GETFN v3_get;
 
         const bool use_libbox64 = true;
-	if (use_libbox64) {
-	    InitBox64();
-	}
+        if (use_libbox64) {
+            InitBox64();
+        }
 
         // filename is full path to binary
         if (water::File(filename).existsAsFile())
@@ -3459,9 +3476,9 @@ public:
                 return false;
             }
 
-            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME, use_libbox64, RunFuncWithEmulator);
-            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME, use_libbox64, RunFuncWithEmulator);
-            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME, use_libbox64, RunFuncWithEmulator);
+            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME, use_libbox64, GetFunctionWithEmulator);
+            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME, use_libbox64, GetFunctionWithEmulator);
+            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME, use_libbox64, GetFunctionWithEmulator);
         }
         // assume filename is a vst3 bundle
         else
@@ -3506,9 +3523,9 @@ public:
                 return false;
             }
 
-            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME, use_libbox64, RunFuncWithEmulator);
-            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME, use_libbox64, RunFuncWithEmulator);
-            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME, use_libbox64, RunFuncWithEmulator);
+            v3_entry = pData->libSymbol<V3_ENTRYFN>(V3_ENTRYFNNAME, use_libbox64, GetFunctionWithEmulator);
+            v3_exit = pData->libSymbol<V3_EXITFN>(V3_EXITFNNAME, use_libbox64, GetFunctionWithEmulator);
+            v3_get = pData->libSymbol<V3_GETFN>(V3_GETFNNAME, use_libbox64, GetFunctionWithEmulator);
            #endif
         }
 
@@ -3529,7 +3546,8 @@ public:
        #elif defined(CARLA_OS_WIN)
         v3_entry();
        #else
-        v3_entry(pData->lib);
+        RunFuncWithEmulator(reinterpret_cast<const void*>(v3_entry), 1, pData->lib);
+        //v3_entry(pData->lib);
        #endif
 
         // ------------------------------------------------------------------------------------------------------------
